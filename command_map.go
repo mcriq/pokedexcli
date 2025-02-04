@@ -1,27 +1,40 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
-func commandMap(config *PaginationConfig) error {
-	urlToUse := "https://pokeapi.co/api/v2/location-area/"
-	if config.Next != "" {
-		urlToUse = config.Next
-	}
-
-	locationData, err := getLocationArea(urlToUse)
+func commandMapf(cfg *config) error {
+	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL)
 	if err != nil {
-		return fmt.Errorf("unable to fetch location data: %v", err)
+		return err
 	}
 
-	// Print the locations
-	for _, area := range locationData.Results {
-		fmt.Println(area.Name)
+	cfg.nextLocationsURL = locationsResp.Next
+	cfg.prevLocationsURL = locationsResp.Previous
+
+	for _, loc := range locationsResp.Results {
+		fmt.Println(loc.Name)
+	}
+	return nil
+}
+
+func commandMapb(cfg *config) error {
+	if cfg.prevLocationsURL == nil {
+		return errors.New("you're on the first page")
 	}
 
-	// Update the config for next time
-	config.Next = locationData.Next
-	config.Previous = locationData.Previous
+	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.prevLocationsURL)
+	if err != nil {
+		return err
+	}
+
+	cfg.nextLocationsURL = locationResp.Next
+	cfg.prevLocationsURL = locationResp.Previous
+
+	for _, loc := range locationResp.Results {
+		fmt.Println(loc.Name)
+	}
 	return nil
 }

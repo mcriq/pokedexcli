@@ -5,10 +5,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/mcriq/pokedexcli/internal/pokeapi"
 )
 
-func startRepl() {
-	config := &PaginationConfig{}
+type config struct {
+	pokeapiClient pokeapi.Client
+	nextLocationsURL *string
+	prevLocationsURL *string
+}
+
+func startRepl(cfg *config) {
 	reader := bufio.NewScanner(os.Stdin)
     for {
         fmt.Print("Pokedex > ")
@@ -22,7 +29,7 @@ func startRepl() {
 
 		command, exists := getCommands()[commandName]
 		if exists {
-			err := command.callback(config)
+			err := command.callback(cfg)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -43,7 +50,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*PaginationConfig) error
+	callback    func(*config) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -61,17 +68,13 @@ func getCommands() map[string]cliCommand {
 	"map": {
 		name:        "map",
 		description: "Displays location areas",
-		callback:    commandMap,
+		callback:    commandMapf,
 	},
 	"mapb": {
 		name:        "mapb",
 		description: "Displays previous page of location areas",
-		callback:    commandMapB,
+		callback:    commandMapb,
 	},
 	}
 }
 
-type PaginationConfig struct {
-	Next string
-	Previous *string
-}
