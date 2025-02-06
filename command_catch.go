@@ -9,7 +9,7 @@ import (
 func commandCatch(cfg *config, args ...string) error {
 	pokemonName := ""
 
-	if len(args) == 0 {
+	if len(args) < 1 {
 		return errors.New("no pokemon name entered")
 	}
 
