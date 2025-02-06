@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) ListEncounters(location string) (Location, error) {
+func (c *Client) GetLocation(location string) (Location, error) {
 	url := baseURL + "/location-area/" + location
 
 	if cached, ok := c.cache.Get(url); ok {
@@ -36,11 +36,11 @@ func (c *Client) ListEncounters(location string) (Location, error) {
 
 	c.cache.Add(url, dat)
 
-	encounterResp := Location{}
-	err = json.Unmarshal(dat, &encounterResp)
+	locationResp := Location{}
+	err = json.Unmarshal(dat, &locationResp)
 	if err != nil {
 		return Location{}, err
 	}
 
-	return encounterResp, nil
+	return locationResp, nil
 }
